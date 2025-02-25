@@ -21,8 +21,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post(':id/upload-profile-picture')
-  @UseInterceptors(FileInterceptor('file'))
   @Get()
   findAll() {
     return this.usersService.findAll();

@@ -9,7 +9,7 @@ import { User } from 'src/users/schema/user.schema';
 @Injectable()
 export class ProductsService {
   constructor(
-    @InjectModel('Products') private postModel: Model<Products>,
+    @InjectModel('Products') private productsModel: Model<Products>,
     @InjectModel('User') private userModel: Model<User>,
   ) {}
 
@@ -17,20 +17,20 @@ export class ProductsService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new BadRequestException('user not found');
 
-    const newPost = await this.postModel.create({
+    const newProducts = await this.productsModel.create({
       ...createPostDto,
       user: user._id,
     });
 
     await this.userModel.findByIdAndUpdate(user._id, {
-      $push: { posts: newPost._id },
+      $push: { Products: newProducts._id },
     });
 
-    return newPost;
+    return newProducts;
   }
 
   findAll() {
-    return this.postModel
+    return this.productsModel
       .find()
       .populate({ path: 'user', select: '-posts -createdAt -__v' });
   }

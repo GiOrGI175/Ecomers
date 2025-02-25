@@ -32,7 +32,7 @@ export class UsersService {
   findAll() {
     return this.userModel
       .find()
-      .populate({ path: 'posts', select: '-user -__v' });
+      .populate({ path: 'Products', select: '-user -__v' });
   }
 
   async findOne(id: string) {

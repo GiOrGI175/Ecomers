@@ -15,7 +15,7 @@ import { UpdatePostDto } from './dto/update-product.dto';
 // import { HasUserId } from './guards/hasUserId.guard';
 import { isAuthGuard } from 'src/auth/auth.guard';
 
-@Controller('posts')
+@Controller('products')
 @UseGuards(isAuthGuard)
 export class ProductsController {
   constructor(private readonly ProductsService: ProductsService) {}
