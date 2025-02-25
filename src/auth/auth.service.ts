@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from 'src/users/schema/user.schema';
+import { signUpDto } from './dto/sign-up.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { signInDto } from './dto/sign-in.dto';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    @InjectModel('User') private userModel: Model<User>,
+    private JwtService: JwtService,
+  ) {}
+
+  async signUp({ email, firstName, lastName, password }: signUpDto) {
+    const existsUser = await this.userModel.findOne({ email });
+    if (existsUser) throw new BadRequestException('user already exists');
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await this.userModel.create({
+      email,
+      firstName,
+      lastName,
+      password: hashedPassword,
+    });
+
+    return 'user registered successfully';
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async signIn({ email, password }: signInDto) {
+    const existUser = await this.userModel.findOne({ email });
+    if (!existUser)
+      throw new BadRequestException('email or password is invalid');
+
+    const isPassEqual = await bcrypt.compare(password, existUser.password);
+    if (!isPassEqual)
+      throw new BadRequestException('email or password is invalid');
+
+    const payLoad = {
+      userId: existUser._id,
+      role: existUser.role,
+    };
+
+    const accesToken = await this.JwtService.sign(payLoad, { expiresIn: '1h' });
+
+    return { accesToken };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async getCurrentUser(userId) {
+    const user = await this.userModel.findById(userId).select('-password');
+    return user;
   }
 }

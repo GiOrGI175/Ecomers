@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreatePostDto } from './dto/create-product.dto';
+import { UpdatePostDto } from './dto/update-product.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Products } from './schema/products.schema';
+import { Model } from 'mongoose';
+import { User } from 'src/users/schema/user.schema';
 
 @Injectable()
 export class ProductsService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  constructor(
+    @InjectModel('Products') private postModel: Model<Products>,
+    @InjectModel('User') private userModel: Model<User>,
+  ) {}
+
+  async create(userId, createPostDto: CreatePostDto) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new BadRequestException('user not found');
+
+    const newPost = await this.postModel.create({
+      ...createPostDto,
+      user: user._id,
+    });
+
+    await this.userModel.findByIdAndUpdate(user._id, {
+      $push: { posts: newPost._id },
+    });
+
+    return newPost;
   }
 
   findAll() {
-    return `This action returns all products`;
+    return this.postModel
+      .find()
+      .populate({ path: 'user', select: '-posts -createdAt -__v' });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} product`;
+    return `This action returns a #${id} post`;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  update(id: number, updatePostDto: UpdatePostDto) {
+    return `This action updates a #${id} post`;
   }
 
   remove(id: number) {
-    return `This action removes a #${id} product`;
+    return `This action removes a #${id} post`;
   }
 }

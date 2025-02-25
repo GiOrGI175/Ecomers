@@ -1,34 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { CreatePostDto } from './dto/create-product.dto';
+import { UpdatePostDto } from './dto/update-product.dto';
+// import { HasUserId } from './guards/hasUserId.guard';
+import { isAuthGuard } from 'src/auth/auth.guard';
 
-@Controller('products')
+@Controller('posts')
+@UseGuards(isAuthGuard)
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly ProductsService: ProductsService) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  create(@Req() requset, @Body() createPostDto: CreatePostDto) {
+    const userId = requset.userId;
+
+    return this.ProductsService.create(userId, createPostDto);
   }
 
   @Get()
   findAll() {
-    return this.productsService.findAll();
+    return this.ProductsService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
+    return this.ProductsService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(+id, updateProductDto);
+  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+    return this.ProductsService.update(+id, updatePostDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+    return this.ProductsService.remove(+id);
   }
 }
