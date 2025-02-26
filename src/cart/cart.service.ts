@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import { User } from 'src/users/schema/user.schema';
 
 @Injectable()
@@ -10,59 +10,67 @@ export class CartService {
   constructor(@InjectModel('User') private userModel: Model<User>) {}
 
   async addToCart(userId: string, productId: string) {
+    if (!isValidObjectId(productId)) {
+      throw new BadRequestException('Invalid product ID');
+    }
+
     const user = await this.userModel.findById(userId);
-    if (!user) throw new BadRequestException('user not found');
+    if (!user) throw new BadRequestException('User not found');
 
     const existProduct = user.cart.findIndex(
       (el) => el.productId.toString() === productId,
     );
 
+    console.log(productId, 'productId service');
+
     if (existProduct !== -1) {
       user.cart[existProduct].quantity += 1;
     } else {
-      user.cart.push({ productId, quantity: 1 });
+      user.cart.push({ productId: new Types.ObjectId(productId), quantity: 1 });
     }
 
-    await this.userModel.findByIdAndUpdate(user._id, {
-      $push: {
-        cart: {
-          productId: productId,
-          quantity: 1,
-        },
-      },
-    });
+    await user.save();
 
     const updatedUser = await this.userModel
       .findById(userId)
       .populate('cart.productId');
-
     return updatedUser;
+  }
 
-    // const existingProductIndex = user.cart.findIndex((item) => {
-    //   return item.productId && item.productId.toString() === productId;
-    // });
+  async updateQuantity(userId: string, productId: string, change: number) {
+    if (!isValidObjectId(productId)) {
+      throw new BadRequestException('Invalid product ID');
+    }
 
-    // console.log(existingProductIndex);
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
 
-    // if (existingProductIndex !== -1) {
-    //   user.cart[existingProductIndex].quantity += 1;
-    // }
+    const existProductIndex = user.cart.findIndex(
+      (el) => el.productId.toString() === productId,
+    );
 
-    // await this.userModel.findByIdAndUpdate(user._id, {
-    //   $push: { cart: productId },
-    // });
+    if (existProductIndex === -1) {
+      throw new BadRequestException('Product not found in cart');
+    }
 
-    // const updateCart = await this.userModel.findById(userId).populate('cart');
+    const currentQuantity = user.cart[existProductIndex].quantity;
+    const newQuantity = currentQuantity + change;
 
-    return 'wesit';
+    if (newQuantity <= 0) {
+      throw new BadRequestException('Quantity cannot be less than 1');
+    }
+
+    user.cart[existProductIndex].quantity = newQuantity;
+
+    await user.save();
+
+    return user;
   }
 
   create(createCartDto: CreateCartDto) {
     return 'This action adds a new cart';
-  }
-
-  findAll() {
-    return `This action returns all cart`;
   }
 
   findOne(id: number) {
@@ -73,7 +81,28 @@ export class CartService {
     return `This action updates a #${id} cart`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
+  async removeProductFromCart(userId: string, productId: string) {
+    if (!isValidObjectId(productId)) {
+      throw new BadRequestException('Invalid product ID');
+    }
+
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const existProductIndex = user.cart.findIndex(
+      (el) => el.productId.toString() === productId,
+    );
+
+    if (existProductIndex === -1) {
+      throw new BadRequestException('Product not found in cart');
+    }
+
+    user.cart.splice(existProductIndex, 1);
+
+    await user.save();
+
+    return user;
   }
 }

@@ -8,6 +8,7 @@ import {
   Delete,
   Req,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
@@ -23,26 +24,38 @@ export class CartController {
   addToCart(@Req() request, @Param('id') productId: string) {
     const userId = request.userId;
 
+    console.log(productId, 'productId controler');
+
     return this.cartService.addToCart(userId, productId);
   }
 
-  @Get()
-  findAll() {
-    return this.cartService.findAll();
+  @Patch('quantity/:Id')
+  async updateQuantity(
+    @Req() request,
+    @Param('Id') productId: string,
+    @Body('change') change: number,
+  ) {
+    const userId = request.userId;
+
+    return this.cartService.updateQuantity(userId, productId, change);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.cartService.findOne(+id);
   }
+  @Delete('remove/:Id')
+  async removeProductFromCart(@Req() request, @Param('Id') productId: string) {
+    try {
+      const userId = request.userId;
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+      const updatedUser = await this.cartService.removeProductFromCart(
+        userId,
+        productId,
+      );
+      return updatedUser;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }

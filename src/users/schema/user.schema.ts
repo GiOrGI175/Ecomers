@@ -35,7 +35,7 @@ export class User {
     ],
     default: [],
   })
-  cart: { productId: mongoose.Schema.Types.ObjectId; quantity: number }[];
+  cart: { productId: mongoose.Types.ObjectId; quantity: number }[];
 }
 
 export const userSchema = SchemaFactory.createForClass(User);
