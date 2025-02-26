@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreatePostDto } from './dto/create-product.dto';
 import { UpdatePostDto } from './dto/update-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,7 +17,11 @@ export class ProductsService {
     @InjectModel('User') private userModel: Model<User>,
   ) {}
 
-  async create(userId, createPostDto: CreatePostDto) {
+  async create(userId, role: string, createPostDto: CreatePostDto) {
+    console.log(role);
+
+    if (role !== 'admin') throw new UnauthorizedException('permition dined');
+
     const user = await this.userModel.findById(userId);
     if (!user) throw new BadRequestException('user not found');
 
@@ -30,9 +38,10 @@ export class ProductsService {
   }
 
   findAll() {
-    return this.productsModel
-      .find()
-      .populate({ path: 'user', select: '-posts -createdAt -__v' });
+    return this.productsModel.find().populate({
+      path: 'user',
+      select: '-Products -createdAt -__v -password -role -cart',
+    });
   }
 
   findOne(id: number) {

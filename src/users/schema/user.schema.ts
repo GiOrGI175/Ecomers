@@ -25,6 +25,17 @@ export class User {
     default: [],
   })
   Products: mongoose.Schema.Types.ObjectId[];
+
+  @Prop({
+    type: [
+      {
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Products' },
+        quantity: { type: Number, default: 1 },
+      },
+    ],
+    default: [],
+  })
+  cart: { productId: mongoose.Schema.Types.ObjectId; quantity: number }[];
 }
 
 export const userSchema = SchemaFactory.createForClass(User);
