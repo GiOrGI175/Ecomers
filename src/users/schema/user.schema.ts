@@ -67,5 +67,14 @@ export class User {
     orderDate: Date;
     status: string;
   }[];
+
+  @Prop({ type: Boolean, default: false })
+  isVerifed: boolean;
+
+  @Prop({ type: String })
+  otpCode: string;
+
+  @Prop({ type: Date })
+  otpCodeValidationData: Date;
 }
 export const userSchema = SchemaFactory.createForClass(User);

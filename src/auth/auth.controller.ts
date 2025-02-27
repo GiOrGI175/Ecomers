@@ -14,6 +14,18 @@ export class AuthController {
     return this.authService.signUp(signUpDto);
   }
 
+  @Post('verify')
+  verifyEmail(@Body() Body) {
+    const { email, otpCode } = Body;
+
+    return this.authService.verifyEmail(email, otpCode);
+  }
+
+  @Post('resend-verification-code')
+  resendVerificationCode(@Body('email') email) {
+    return this.authService.resendVerificationCode(email);
+  }
+
   @Post('sign-in')
   signIn(@Body() signInDto: signInDto) {
     return this.authService.signIn(signInDto);

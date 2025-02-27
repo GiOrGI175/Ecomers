@@ -8,6 +8,7 @@ import { CartModule } from './cart/cart.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { EmailSenderModule } from './email-sender/email-sender.module';
 
 @Module({
   imports: [
@@ -21,12 +22,14 @@ import { MailerModule } from '@nestjs-modules/mailer';
       transport: {
         host: process.env.EMAIL_HOST,
         port: 465,
+        secure: true,
         auth: {
           user: process.env.EMAIL_USER,
-          pass: process.env,
+          pass: process.env.EMAIL_PASS,
         },
       },
     }),
+    EmailSenderModule,
   ],
 
   controllers: [AppController],
