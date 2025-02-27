@@ -7,6 +7,7 @@ import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -16,6 +17,16 @@ import { MongooseModule } from '@nestjs/mongoose';
     UsersModule,
     ProductsModule,
     CartModule,
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST,
+        port: 465,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env,
+        },
+      },
+    }),
   ],
 
   controllers: [AppController],
