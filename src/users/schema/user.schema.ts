@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { Role } from 'src/enums/roles.enum';
 
 @Schema({ timestamps: true })
@@ -31,11 +31,41 @@ export class User {
       {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Products' },
         quantity: { type: Number, default: 1 },
+        totalPrice: { type: Number, default: 0 },
       },
     ],
     default: [],
   })
-  cart: { productId: mongoose.Types.ObjectId; quantity: number }[];
-}
+  cart: {
+    productId: mongoose.Types.ObjectId;
+    quantity: number;
+    totalPrice: number;
+  }[];
 
+  @Prop({
+    type: [
+      {
+        products: [
+          {
+            productId: { type: Types.ObjectId, ref: 'Products' },
+            quantity: { type: Number, default: 1 },
+            totalPrice: { type: Number, default: 0 },
+          },
+        ],
+        orderDate: { type: Date, default: Date.now },
+        status: { type: String, default: 'pending' },
+      },
+    ],
+    default: [],
+  })
+  orders: {
+    products: {
+      productId: Types.ObjectId;
+      quantity: number;
+      totalPrice: number;
+    }[];
+    orderDate: Date;
+    status: string;
+  }[];
+}
 export const userSchema = SchemaFactory.createForClass(User);

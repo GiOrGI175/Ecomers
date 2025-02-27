@@ -20,11 +20,9 @@ import { isAuthGuard } from 'src/auth/auth.guard';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Post(':id')
+  @Post('add/:id')
   addToCart(@Req() request, @Param('id') productId: string) {
     const userId = request.userId;
-
-    console.log(productId, 'productId controler');
 
     return this.cartService.addToCart(userId, productId);
   }
@@ -40,10 +38,6 @@ export class CartController {
     return this.cartService.updateQuantity(userId, productId, change);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
-  }
   @Delete('remove/:Id')
   async removeProductFromCart(@Req() request, @Param('Id') productId: string) {
     try {
@@ -57,5 +51,14 @@ export class CartController {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  @Post('orders')
+  setOrders(@Req() request) {
+    const userId = request.userId;
+
+    console.log(userId);
+
+    return this.cartService.setOrders(userId);
   }
 }
