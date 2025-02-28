@@ -13,7 +13,7 @@ import {
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
-import { isAuthGuard } from 'src/auth/auth.guard';
+import { isAuthGuard } from 'src/auth/guards/auth.guard';
 
 @Controller('cart')
 @UseGuards(isAuthGuard)

@@ -76,5 +76,8 @@ export class User {
 
   @Prop({ type: Date })
   otpCodeValidationData: Date;
+
+  @Prop({ type: String })
+  avatar: string;
 }
 export const userSchema = SchemaFactory.createForClass(User);

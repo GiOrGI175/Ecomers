@@ -117,6 +117,22 @@ export class AuthService {
     return { accesToken };
   }
 
+  async signInWithGoogle(user) {
+    let existUser = await this.userModel.findOne({ email: user.email });
+
+    if (!existUser)
+      existUser = await this.userModel.create({ ...user, isVerifed: true });
+
+    const payLoad = {
+      userId: existUser._id,
+      role: existUser.role,
+    };
+
+    const accesToken = await this.JwtService.sign(payLoad, { expiresIn: '1h' });
+
+    return accesToken;
+  }
+
   async getCurrentUser(userId) {
     const user = await this.userModel.findById(userId).select('-password');
     return user;

@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { isAuthGuard } from 'src/auth/auth.guard';
+import { isAuthGuard } from 'src/auth/guards/auth.guard';
 import { Role } from './role.decorator';
 import { RoleGuard } from 'src/guards/role.guard';
 import { FileInterceptor } from '@nestjs/platform-express';

@@ -13,7 +13,7 @@ import { ProductsService } from './products.service';
 import { CreatePostDto } from './dto/create-product.dto';
 import { UpdatePostDto } from './dto/update-product.dto';
 // import { HasUserId } from './guards/hasUserId.guard';
-import { isAuthGuard } from 'src/auth/auth.guard';
+import { isAuthGuard } from 'src/auth/guards/auth.guard';
 import { RoleGuard } from 'src/guards/role.guard';
 import { Role } from 'src/users/role.decorator';
 
